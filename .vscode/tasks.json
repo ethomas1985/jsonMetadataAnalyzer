@@ -1,0 +1,36 @@
+// {
+// 	// See https://go.microsoft.com/fwlink/?LinkId=733558
+// 	// for the documentation about the tasks.json format
+// 	"version": "0.1.0",
+// 	"command": "tsc",
+// 	"isShellCommand": true,
+// 	"args": ["-w", "-p", ".", "--listFiles", "--pretty"],
+// 	"showOutput": "always",
+// 	"isWatching": true,
+// 	"problemMatcher": "$tsc-watch"
+// }
+
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "0.1.0",
+	"command": "cmd.exe",
+	"echoCommand": true,
+	"args": [
+		"/c"
+	],
+	"showOutput": "always",
+	"tasks": [
+		{
+			// taskname is passed to the command line before the task.args...
+			"taskName": "tsc",
+			"args": [
+				"-p",
+				".",
+				"--pretty", "--listFiles"
+			],
+			"isBuildCommand": true,
+			"problemMatcher": "$tsc"
+		}
+	]
+}
