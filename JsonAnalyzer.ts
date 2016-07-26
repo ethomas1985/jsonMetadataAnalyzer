@@ -69,9 +69,16 @@ namespace jsonMetaDataAnalyzer {
 			let data = fs.readFileSync(file, "utf-8");
 			let json: {} = JSON.parse(data);
 
-			if (json["type"] !== "item") {
-				return;
-			}
+			let isWeapon = json["subtype"] === "weapon";
+			let isArmor = json["subtype"] === "armor";
+
+			// if (json["type"] !== "item") {
+			// 	return;
+			// }
+
+			// if (!isWeapon) {
+			// 	return;
+			// }
 
 			if (this.fileNames.indexOf(file) < 0) {
 				this.fileNames.push(file);
@@ -120,7 +127,7 @@ namespace jsonMetaDataAnalyzer {
 				this.properties[name].push(subProperty);
 
 				if (subProperty.type === "object") {
-					this.processObjectField(file, property, data[property]);
+					this.processObjectField(file, name, data[subproperty]);
 				}
 			}
 		}
@@ -129,7 +136,6 @@ namespace jsonMetaDataAnalyzer {
 	export class Program {
 		private delimiter = "|";
 
-		private itemsDirectory: string[];
 		public Total: number;
 		public Properties: PropertyData;
 		public PropertyNames: string[];
@@ -181,7 +187,7 @@ namespace jsonMetaDataAnalyzer {
 			console.log(distinctFiles.length + " Distinct File(s)");
 			console.log(distinctValues.length + " Distinct Values");
 			console.log(Array(80).join("-"));
-			this.ReportDistinctValues(distinctFiles);
+			this.PrintStrings(distinctFiles);
 			console.log(Array(80).join("-"));
 
 			//
@@ -191,25 +197,50 @@ namespace jsonMetaDataAnalyzer {
 			console.log();
 		}
 
-		public ReportDistinctValues(propertyData: string[]) {
+		public ReportUsages(properties: PropertyData, property: string) {
+			console.log(property);
+			let subtypeValues = properties[property].map(x => x.value);
+			subtypeValues
+				.filter((x, i) => subtypeValues.indexOf(x) === i)
+				.map(x => {
+					return {
+						Value: x,
+						Usages: properties[property].filter(y => y.value === x).length
+					}
+				})
+				.map(x => console.log("    " + JSON.stringify(x.Value) + "|" + x.Usages));
+		}
+
+		public PrintStrings(propertyData: string[]) {
 			for (let value in propertyData) {
 				console.log(propertyData[value]);
 			}
 		}
 
 		private main() {
-			this.itemsDirectory = [
+			let psrdDataDirectory = [
 				"C:",
 				"Users",
-				"thean",
+				"eric.thomas",
 				"Documents",
 				"GitHub",
-				"PSRD-Data",
-				// "core_rulebook",
-				// "item"
+				"PSRD-Data"
 			];
+
+			let directory = psrdDataDirectory.concat(
+				"core_rulebook",
+				"item"
+			);
+
+			// let directory = psrdDataDirectory.concat(
+			// 	"core_rulebook",
+			// 	"rules",
+			// 	"equipment",
+			// 	"weapons"
+			// );
+
 			let anaylzer = new JsonAnalyser();
-			anaylzer.readDirectory(this.itemsDirectory);
+			anaylzer.readDirectory(directory);
 
 			this.Properties = anaylzer.properties;
 
@@ -223,13 +254,15 @@ module.exports = jsonMetaDataAnalyzer;
 
 let program = new jsonMetaDataAnalyzer.Program();
 
-// // program.ReportPropertyOccurances(program.Properties, program.Total);
-// // for (let property in program.Properties) {
-// // 	program.ReportSpecificPropertyData(program.Properties[property], property);
-// // }
+program.ReportPropertyOccurances(program.Properties, program.Total);
+// for (let property in program.Properties) {
+// 	program.ReportSpecificPropertyData(program.Properties[property], property);
+// }
 
 // let propertyData = program.Properties["subtype"].map(x => x.filename);
 // propertyData.map(x => console.log(x));
 
-let subtypeValues = program.Properties["subtype"].map(x => x.value);
-subtypeValues.filter((x, i) => subtypeValues.indexOf(x) === i);
+// program.ReportUsages(program.Properties, "subtype");
+
+// program.ReportUsages(program.Properties, "slot");
+//  program.ReportUsages(program.Properties, "misc->null");
